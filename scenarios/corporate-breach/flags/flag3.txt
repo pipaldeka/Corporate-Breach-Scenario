@@ -1,0 +1,1 @@
+FLAG{root_access_game_over_LOCAL_TEST}

@@ -1,0 +1,93 @@
+#ansible/playbooks/inject-flags-advanced.yml
+---
+- name: Inject Flags with Custom Permissions
+  hosts: localhost
+  connection: local
+  gather_facts: yes
+  
+  vars:
+    student_id: "{{ student_id }}"
+    scenario: "{{ scenario }}"
+    container_name: "{{ container_name }}"
+    flag_config: "{{ flag_config }}"
+  
+  tasks:
+    - name: Parse flag configuration
+      set_fact:
+        parsed_flags: "{{ flag_config | from_json }}"
+    
+    - name: Display injection plan
+      debug:
+        msg:
+          - "Injecting {{ parsed_flags | length }} flags into {{ container_name }}"
+          - "Student: {{ student_id }}"
+          - "Scenario: {{ scenario }}"
+    
+    - name: Wait for container to be ready
+      command: docker exec {{ container_name }} test -d /var/www/html
+      register: container_check
+      until: container_check.rc == 0
+      retries: 30
+      delay: 2
+      changed_when: false
+    
+    - name: Create parent directories for each flag
+      command: >
+        docker exec {{ container_name }}
+        bash -c "mkdir -p $(dirname '{{ item.location }}')"
+      loop: "{{ parsed_flags }}"
+      changed_when: false
+    
+    - name: Inject each flag to its configured location
+      command: >
+        docker exec {{ container_name }}
+        bash -c "echo '{{ item.content }}' > '{{ item.location }}'"
+      loop: "{{ parsed_flags }}"
+      no_log: false
+    
+    - name: Set ownership for each flag
+      command: >
+        docker exec {{ container_name }}
+        chown {{ item.owner }} '{{ item.location }}'
+      loop: "{{ parsed_flags }}"
+    
+    - name: Set permissions for each flag
+      command: >
+        docker exec {{ container_name }}
+        chmod {{ item.permissions }} '{{ item.location }}'
+      loop: "{{ parsed_flags }}"
+    
+    - name: Verify each flag
+      command: >
+        docker exec {{ container_name }}
+        ls -la '{{ item.location }}'
+      loop: "{{ parsed_flags }}"
+      register: flag_verification
+      changed_when: false
+      ignore_errors: yes
+    
+    - name: Display verification results
+      debug:
+        msg: "{{ item.stdout_lines }}"
+      loop: "{{ flag_verification.results }}"
+      when: item.rc == 0
+    
+    - name: Create metadata directory
+      file:
+        path: /var/log/cyber-range
+        state: directory
+        mode: '0755'
+      ignore_errors: yes
+    
+    - name: Save detailed flag metadata
+      copy:
+        dest: "/var/log/cyber-range/{{ student_id }}-{{ scenario }}-flags.json"
+        content: "{{ {'student_id': student_id, 'scenario': scenario, 'container': container_name, 'num_flags': parsed_flags | length, 'flags': parsed_flags, 'injected_at': ansible_date_time.iso8601} | to_nice_json }}"
+        mode: '0600'
+      ignore_errors: yes
+    
+    - name: Success summary
+      debug:
+        msg: 
+          - "✅ Successfully injected {{ parsed_flags | length }} flag(s)"
+          - "{% for flag in parsed_flags %}FLAG{{ flag.number }}: {{ flag.location }} ({{ flag.owner }} {{ flag.permissions }}){% endfor %}"

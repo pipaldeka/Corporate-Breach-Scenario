@@ -117,9 +117,12 @@ MIT License - see [LICENSE](LICENSE)
 
 ##  Contact
 
-- LinkedIn: [Your Profile]
-- Twitter: [@yourhandle]
-- Email: your.email@example.com
+[Pipal-Deka]: https://www.linkedin.com/in/pipal-deka-0a1808190/
+
+
+
+- LinkedIn: [Pipal-Deka]
+- Email: 21pipal.deka@gmail.com
 
 ---
 

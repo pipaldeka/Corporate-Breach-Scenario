@@ -68,11 +68,6 @@ echo "[+] Creating backup log file..."
 touch /var/log/backup.log
 chmod 644 /var/log/backup.log
 
-# Create dummy source directory (simulating web files)
-echo "[+] Creating dummy web files for backup..."
-mkdir -p /var/www/html
-echo "<!-- Sample web file -->" > /var/www/html/index.html
-echo "<?php phpinfo(); ?>" > /var/www/html/info.php
 
 # Display vulnerability info (for testing/debugging)
 echo ""

@@ -41,7 +41,7 @@ $username = $_SESSION['username'];
             margin-bottom: 20px;
         }
         h1 {
-            color: #00ff88;
+            color: #00000f;
             margin-top: 0;
         }
         .info-box {
@@ -95,15 +95,15 @@ $username = $_SESSION['username'];
         }
         .logout {
             float: right;
-            background: rgba(255,255,255,0.1);
+            background: #15213e;
             padding: 8px 15px;
             border-radius: 5px;
             text-decoration: none;
-            color: #00ff88;
-            border: 1px solid #00ff88;
+            color: #fff;
+            border: 1px solid #000000;
         }
         .logout:hover {
-            background: rgba(0,255,136,0.2);
+            background: #15213e;
         }
         .success-box {
             background: #0f3d0f;

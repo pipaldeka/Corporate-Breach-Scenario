@@ -1,50 +1,3 @@
-<?php
-// scenarios/corporate-breach/webapp/login.php
-
-session_start();
-require_once 'config.php';
-
-$error = '';
-
-if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-    $username = $_POST['username'];
-    $password = $_POST['password'];
-    
-    // VULNERABILITY: SQL Injection
-    $query = "SELECT * FROM employees WHERE username='$username' AND password=MD5('$password')";
-    
-    $result = $conn->query($query);
-    
-    if ($result && $result->num_rows > 0) {
-        $user = $result->fetch_assoc();
-        
-        // Set session variables
-        $_SESSION['user_id'] = $user['id'];
-        $_SESSION['username'] = $user['username'];
-        $_SESSION['role'] = $user['role'];
-        $_SESSION['logged_in'] = true;
-        
-        // Redirect based on role
-        if ($user['role'] == 'admin') {
-            header("Location: /admin.php");
-            exit();
-        } else {
-            header("Location: /dashboard.php");
-            exit();
-        }
-    } else {
-        $error = "Invalid credentials!";
-    }
-    
-    // Debug mode to see query
-    if (isset($_GET['debug'])) {
-        echo "<div style='background:#f0f0f0; padding:10px; margin:10px; border:1px solid #ccc;'>";
-        echo "<strong>Debug Mode - Query:</strong><br>";
-        echo "<code>" . htmlspecialchars($query) . "</code>";
-        echo "</div>";
-    }
-}
-?>
 <!DOCTYPE html>
 <html>
 <head>
@@ -125,10 +78,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     <div class="container">
         <h2>🔐 Employee Login</h2>
         
-        <?php if ($error): ?>
-            <div class="error">❌ <?= htmlspecialchars($error) ?></div>
-        <?php endif; ?>
-        
+                
         <form method="POST">
             <input type="text" name="username" placeholder="Username" required>
             <input type="password" name="password" placeholder="Password" required>
